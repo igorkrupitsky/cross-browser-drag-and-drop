@@ -1,0 +1,140 @@
+<head>
+<script type="text/javascript">
+var oDragItem = null;
+var iClickOffsetX = 0;
+var iClickOffsetY = 0;
+
+function OnLoad(){
+	MakeDragable("idBox1");
+	MakeDragable("idBox2");	
+}
+
+function MakeDragable(id){
+	var oBox = $(id);
+	oBox.className = "Dragable";
+	
+	if (navigator.platform=="iPad"){
+		oBox.ontouchstart= function(e){TouchStart(e)};
+		oBox.ontouchmove=function(e){TouchMove(e)};
+	}else{
+		oBox.onmousemove= function(e){DragMove(oBox,e)};
+		oBox.onmouseup=function(e){DragStop(oBox,e)};
+		oBox.onmousedown=function(e){DragStart(oBox,e);return false};	
+	}	
+}
+
+function TouchStart(e){
+	var oPos = GetObjPos(e.target);
+	iClickOffsetX = e.targetTouches[0].pageX - oPos.x;
+	iClickOffsetY = e.targetTouches[0].pageY - oPos.y;
+}
+
+function DragStart(o,e){
+	if(!e) var e = window.event;
+	oDragItem = o;
+	
+	if (e.offsetX){
+		iClickOffsetX = e.offsetX;
+		iClickOffsetY = e.offsetY;	
+	}else{
+		var oPos = GetObjPos(o);
+		iClickOffsetX = e.clientX - oPos.x;
+		iClickOffsetY = e.clientY - oPos.y;
+	}
+	
+	if (o.setCapture){
+		o.setCapture();
+	}else{
+		window.addEventListener ("mousemove", DragMove2, true);
+		window.addEventListener ("mouseup",   DragStop2, true);
+	}
+}
+
+function DragMove2(e){
+	DragMove(oDragItem,e);
+}
+
+function DragStop2(e){
+	DragStop(oDragItem,e);
+}
+
+function DragMove(o,e){
+	if (oDragItem==null) return;
+
+	if(!e) var e = window.event;
+	var x = e.clientX + document.body.scrollLeft - document.body.clientLeft - iClickOffsetX;
+	var y = e.clientY + document.body.scrollTop  - document.body.clientTop - iClickOffsetY;
+	
+	with(oDragItem.style){
+		zIndex = 1000;
+		position="absolute";
+		left=x;
+		top=y;
+	}
+}
+
+function TouchMove(e){
+    e.preventDefault();
+    var curX = e.targetTouches[0].pageX - iClickOffsetX;
+    var curY = e.targetTouches[0].pageY - iClickOffsetY; 
+    
+    var o = e.targetTouches[0].target;
+    o.style.position = "absolute";
+    o.style.top  = curY + 'px'; 
+    o.style.left = curX + 'px'; 
+}
+
+function DragStop(o,e){
+	if (oDragItem==null) return;
+
+	if (o.releaseCapture){
+		o.releaseCapture();
+	}else if (oDragItem){
+		window.removeEventListener ("mousemove", DragMove2, true);
+		window.removeEventListener ("mouseup",   DragStop2, true);
+	}
+	
+	oDragItem.style.zIndex = 1;
+	oDragItem = null;
+}
+
+function $(s){
+	return document.getElementById(s);
+}
+
+function GetObjPos(obj){
+	var x = 0;
+	var y = 0;
+	
+	var w = obj.offsetWidth;
+	var h = obj.offsetHeight;
+	if (obj.offsetParent) {
+		x = obj.offsetLeft
+		y = obj.offsetTop
+		while (obj = obj.offsetParent){
+			x += obj.offsetLeft;
+			y += obj.offsetTop;
+		}
+	}
+	return {x:x, y:y, w:w, h:h};
+}
+
+</script>
+<style>
+.Dragable{
+	cursor:move;
+   -moz-user-select: -moz-none;   
+   -khtml-user-select: none;   
+   -webkit-user-select: none;   
+   -o-user-select: none;   
+   user-select: none;
+}
+</style>
+</head>
+<body onload="OnLoad()">
+
+<div selectable="no" id="idBox1" style="left: 100px; width: 100px; height:100px; background-color: Red; text-align: center;">Test</div>
+<div selectable="no" id="idBox2" style="width: 100px; height:100px; background-color: Yellow; text-align: center; top:200;">Test</div>
+
+
+</body>
