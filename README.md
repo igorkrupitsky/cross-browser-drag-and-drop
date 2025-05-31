@@ -16,3 +16,18 @@ This article is for those that like nuts and bolts and are not using third party
 
 ## Using the code
 To use this script, use the MakeDragable JavaScript function. It accepts only one parameter: the ID of the element you want users to drag. 
+
+I created a single CSS class to make drag-able elements not selectable and to have the cursor suggest that the element is drag-able.
+
+```CSS
+<style>
+.Dragable
+{
+   cursor:move;
+   -moz-user-select: -moz-none;   
+   -khtml-user-select: none;   
+   -webkit-user-select: none;   
+   -o-user-select: none;   
+   user-select: none;
+}
+```
